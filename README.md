@@ -1,13 +1,12 @@
-# Sample Hardhat Project
+# Godwoken EVM Contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This repository contains EVM contracts built for the Godwoken system. Please note that the code is currently under heavy development and should be considered a work-in-progress.
 
-Try running some of the following tasks:
+## Structure
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+- Gasless
+  - enable zero-cost gasless transaction [feature](https://github.com/godwokenrises/godwoken/discussions/860) on Godwoken based on [ERC4337 Implementation](https://github.com/eth-infinitism/account-abstraction)
+
+## License
+
+Licensed under [MIT License](LICENSE).
