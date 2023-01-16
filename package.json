@@ -6,11 +6,11 @@
   "license": "MIT",
   "scripts": {
     "clean": "hardhat clean",
-    "fmt": "prettier --write \"scripts/*\" \"test/*\" \"contracts/**/*.sol\" \"*.js\" \"*.json\" \"*.ts\"",
-    "lint": "eslint -c .eslintrc.js \"test/*\" \"scripts/*\" && solhint contracts/**/*.sol",
+    "fmt": "prettier --write \"scripts/**/*\" \"test/**/*\" \"contracts/**/*.sol\" \"*.js\" \"*.json\" \"*.ts\"",
+    "lint": "eslint -c .eslintrc.js \"test/**/*\" \"scripts/**/*\" && solhint contracts/**/*.sol",
     "compile": "hardhat compile",
     "build": "yarn compile",
-    "test": "hardhat test && yarn coverage",
+    "test": "hardhat test",
     "size": "hardhat size-contracts",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js"
   },
@@ -30,6 +30,7 @@
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "chai": "^4.2.0",
+    "cross-fetch": "^3.1.5",
     "eslint": "^8.5.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
@@ -48,5 +49,8 @@
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
     "typescript": ">=4.5.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.8.1"
   }
 }
