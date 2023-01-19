@@ -1,14 +1,12 @@
+import * as fs from "fs";
+import { ethers } from "ethers";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
+import "@openzeppelin/hardhat-upgrades";
 
 require("hardhat-contract-sizer");
-
-import "solidity-coverage";
-
-import * as fs from "fs";
-import { ethers } from "ethers";
 
 const TEST_PK1 =
   process.env.PRIVATE_KEY ??

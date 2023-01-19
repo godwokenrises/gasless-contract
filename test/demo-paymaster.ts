@@ -33,6 +33,7 @@ describe("EntryPoint with whitelist paymaster", function () {
     whitelistUser = _whitelistUser;
     const DummyContract = await ethers.getContractFactory("DummyContract");
     dummyContract = await DummyContract.deploy();
+    await dummyContract.deployed();
     console.log(`Deploy dummy contract: ${dummyContract.address}`);
     const testTx = await dummyContract.populateTransaction.test(1, 1);
     dummyContractCallData = testTx.data ?? "";

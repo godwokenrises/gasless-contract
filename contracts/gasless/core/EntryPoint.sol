@@ -9,11 +9,17 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./StakeManager.sol";
 
-contract EntryPoint is IEntryPoint, StakeManager {
+contract EntryPoint is
+    IEntryPoint,
+    Initializable,
+    OwnableUpgradeable,
+    StakeManager
+{
     //a memory copy of UserOp fields (except that dynamic byte arrays: callData
     struct MemoryUserOp {
         address callContract;
@@ -37,16 +43,19 @@ contract EntryPoint is IEntryPoint, StakeManager {
     // solhint-disable-next-line var-name-mixedcase
     address private GW_FULL_NODE;
 
-    // todo use proxy upgradable
     /**
      * @param _paymasterStake - minimum required locked stake for a paymaster
      * @param _unstakeDelaySec - minimum time (in seconds) a paymaster stake must be locked
      */
-    constructor(
+    function initialize(
         address _gwFullNodeMiner,
         uint256 _paymasterStake,
         uint32 _unstakeDelaySec
-    ) StakeManager(_paymasterStake, _unstakeDelaySec) {
+    ) public initializer {
+        __Ownable_init();
+
+        __StakeManager_init(_paymasterStake, _unstakeDelaySec);
+
         require(_gwFullNodeMiner != address(0), "invalid gwMiner");
         require(_unstakeDelaySec > 0, "invalid unstakeDelay");
         require(_paymasterStake > 0, "invalid paymasterStake");

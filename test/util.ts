@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { BigNumber, BigNumberish, Wallet } from "ethers";
 import { arrayify, keccak256 } from "ethers/lib/utils";
-import { ethers, network } from "hardhat";
+import { ethers, network, upgrades } from "hardhat";
 import { EntryPoint, EntryPoint__factory } from "../typechain-types";
 
 let counter = 0;
@@ -13,11 +13,11 @@ export async function deployEntryPoint(
   _provider = ethers.provider
 ): Promise<EntryPoint> {
   const Contract = await ethers.getContractFactory("EntryPoint");
-  const contract = await Contract.deploy(
+  const contract = (await upgrades.deployProxy(Contract, [
     fullNodeMiner,
     paymasterStake,
-    unstakeDelaySecs
-  );
+    unstakeDelaySecs,
+  ])) as EntryPoint;
   return await contract.deployed();
 }
 
