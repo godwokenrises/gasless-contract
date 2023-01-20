@@ -17,3 +17,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Additional terms:
+
+- The inherited code from ERC4337 implementation is under the original License GPL-3, including all the files from:
+  - contracts/gasless
+  - contracts/test/TestToken.sol
+
+- You can find the original GPL-3 license at https://github.com/eth-infinitism/account-abstraction
