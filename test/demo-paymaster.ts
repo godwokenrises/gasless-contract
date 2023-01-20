@@ -6,14 +6,14 @@ import {
   DemoPaymaster__factory,
   DummyContract,
   AlwaysSuccessPaymaster__factory,
-} from "../../typechain-types";
+} from "../typechain-types";
 import { hexConcat, parseEther } from "ethers/lib/utils";
-import { UserOperationStruct } from "../../typechain-types/contracts/gasless/core/EntryPoint";
+import { UserOperationStruct } from "../typechain-types/contracts/gasless/core/EntryPoint";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { expect } from "chai";
 import "@nomicfoundation/hardhat-chai-matchers";
 import { readFile } from "fs/promises";
-import abi from "../../erc20/abi.json";
+import abi from "../erc20/abi.json";
 import { createNonRandomWallet, getOrDeployEntrypointContract } from "./util";
 
 describe("EntryPoint with whitelist paymaster", function () {
