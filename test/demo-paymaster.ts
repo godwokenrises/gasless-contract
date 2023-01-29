@@ -88,6 +88,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([alwaysSuccessPaymaster.address, "0x1234"]),
@@ -113,6 +114,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
@@ -141,6 +143,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
@@ -168,6 +171,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
@@ -181,11 +185,11 @@ describe("EntryPoint with whitelist paymaster", function () {
       const abiCoder = new ethers.utils.AbiCoder();
       let payload = abiCoder.encode(
         [
-          "tuple(address callContract, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, bytes paymasterAndData) UserOperation",
+          "tuple(address callContract, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, bytes paymasterAndData) UserOperation",
         ],
         [userOp]
       );
-      payload = "0xfb4350d8" + payload.slice(2);
+      payload = "0xb4e9984f" + payload.slice(2);
 
       const plainTx = {
         from: whitelistUser.address,
@@ -212,6 +216,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
@@ -235,6 +240,7 @@ describe("EntryPoint with whitelist paymaster", function () {
         callData: dummyContractCallData,
         callGasLimit: 100000,
         verificationGasLimit: 100000,
+        preVerificationGas: 60000,
         maxFeePerGas: 1,
         maxPriorityFeePerGas: 1,
         paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
@@ -296,6 +302,7 @@ describe("EntryPoint with whitelist paymaster", function () {
           callData,
           callGasLimit: 100000,
           verificationGasLimit: 100000,
+          preVerificationGas: 60000,
           maxFeePerGas: 1,
           maxPriorityFeePerGas: 1,
           paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
