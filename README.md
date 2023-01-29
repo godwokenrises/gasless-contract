@@ -9,4 +9,10 @@ This repository contains EVM contracts built for the Godwoken system. Please not
 
 ## License
 
-Licensed under [MIT License](LICENSE).
+All the codes are Licensed under [MIT License](LICENSE) except:
+
+- The inherited code from ERC4337 implementation is under the original License GPL-3, including all the files from:
+  - contracts/gasless
+  - contracts/test/TestToken.sol
+
+- You can find the original GPL-3 license at https://github.com/eth-infinitism/account-abstraction
