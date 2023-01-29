@@ -9,11 +9,19 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./StakeManager.sol";
 
-contract EntryPoint is IEntryPoint, StakeManager {
+contract EntryPoint is
+    IEntryPoint,
+    Initializable,
+    OwnableUpgradeable,
+    PausableUpgradeable,
+    StakeManager
+{
     //a memory copy of UserOp fields (except that dynamic byte arrays: callData
     struct MemoryUserOp {
         address callContract;
@@ -37,16 +45,19 @@ contract EntryPoint is IEntryPoint, StakeManager {
     // solhint-disable-next-line var-name-mixedcase
     address private GW_FULL_NODE;
 
-    // todo use proxy upgradable
     /**
      * @param _paymasterStake - minimum required locked stake for a paymaster
      * @param _unstakeDelaySec - minimum time (in seconds) a paymaster stake must be locked
      */
-    constructor(
+    function initialize(
         address _gwFullNodeMiner,
         uint256 _paymasterStake,
         uint32 _unstakeDelaySec
-    ) StakeManager(_paymasterStake, _unstakeDelaySec) {
+    ) public initializer {
+        __Ownable_init();
+        __Pausable_init();
+        __StakeManager_init(_paymasterStake, _unstakeDelaySec);
+
         require(_gwFullNodeMiner != address(0), "invalid gwMiner");
         require(_unstakeDelaySec > 0, "invalid unstakeDelay");
         require(_paymasterStake > 0, "invalid paymasterStake");
@@ -58,7 +69,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
      * Execute a UserOperation.
      * @param op the operations to execute
      */
-    function handleOp(UserOperation calldata op) public {
+    function handleOp(UserOperation calldata op) public whenNotPaused {
         UserOpInfo memory opInfo;
         _validatePrepayment(op, opInfo);
 
@@ -71,7 +82,10 @@ contract EntryPoint is IEntryPoint, StakeManager {
      * @param beneficiary the address to receive the fees
      * @param amount amount to transfer.
      */
-    function _compensate(address payable beneficiary, uint256 amount) internal {
+    function _compensate(
+        address payable beneficiary,
+        uint256 amount
+    ) internal whenNotPaused {
         require(beneficiary != address(0), "invalid beneficiary");
         (bool success, ) = beneficiary.call{value: amount}("");
         require(success);
@@ -86,7 +100,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
     function _executeUserOp(
         UserOperation calldata userOp,
         UserOpInfo memory opInfo
-    ) private returns (uint256 collected) {
+    ) private whenNotPaused returns (uint256 collected) {
         uint256 preGas = gasleft();
         bytes memory context = getMemoryBytesFromOffset(opInfo.contextOffset);
 
@@ -113,7 +127,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         bytes calldata callData,
         UserOpInfo memory opInfo,
         bytes calldata context
-    ) external returns (uint256 actualGasCost) {
+    ) external whenNotPaused returns (uint256 actualGasCost) {
         uint256 preGas = gasleft();
         require(msg.sender == address(this));
 
@@ -166,7 +180,11 @@ contract EntryPoint is IEntryPoint, StakeManager {
      */
     function simulateValidation(
         UserOperation calldata userOp
-    ) external returns (uint256 preOpGas, uint256 prefund, uint256 deadline) {
+    )
+        external
+        whenNotPaused
+        returns (uint256 preOpGas, uint256 prefund, uint256 deadline)
+    {
         uint256 preGas = gasleft();
         UserOpInfo memory outOpInfo;
 
@@ -190,7 +208,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         UserOperation calldata op,
         UserOpInfo memory opInfo,
         uint256 requiredPreFund
-    ) internal returns (bytes memory context, uint256 deadline) {
+    ) internal whenNotPaused returns (bytes memory context, uint256 deadline) {
         unchecked {
             // check paymaster fund is enough
             // decrease paymaster deposit after
@@ -237,7 +255,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
     function _validatePrepayment(
         UserOperation calldata userOp,
         UserOpInfo memory outOpInfo
-    ) private returns (uint256 deadline) {
+    ) private whenNotPaused returns (uint256 deadline) {
         uint256 preGas = gasleft();
         MemoryUserOp memory mUserOp = outOpInfo.mUserOp;
         _copyUserOpToMemory(userOp, mUserOp);
@@ -296,7 +314,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         UserOpInfo memory opInfo,
         bytes memory context,
         uint256 actualGas
-    ) private returns (uint256 actualGasCost) {
+    ) private whenNotPaused returns (uint256 actualGasCost) {
         uint256 preGas = gasleft();
         unchecked {
             MemoryUserOp memory mUserOp = opInfo.mUserOp;
@@ -340,6 +358,16 @@ contract EntryPoint is IEntryPoint, StakeManager {
                 success
             );
         } // unchecked
+    }
+
+    function pause() public onlyOwner whenNotPaused {
+        _pause();
+        emit Paused(owner());
+    }
+
+    function unpause() public onlyOwner whenPaused {
+        _unpause();
+        emit Unpaused(owner());
     }
 
     function _getRequiredPrefund(

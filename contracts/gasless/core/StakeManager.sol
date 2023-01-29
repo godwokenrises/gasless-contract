@@ -2,6 +2,7 @@
 pragma solidity ^0.8.12;
 
 import "../interfaces/IStakeManager.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable not-rely-on-time */
@@ -10,18 +11,21 @@ import "../interfaces/IStakeManager.sol";
  * deposit is just a balance used to pay for UserOperations (either by a paymaster or a wallet)
  * stake is value locked for at least "unstakeDelay" by a paymaster.
  */
-abstract contract StakeManager is IStakeManager {
+abstract contract StakeManager is IStakeManager, Initializable {
     /**
      * minimum time (in seconds) required to lock a paymaster stake before it can be withdraw.
      */
-    uint32 public immutable unstakeDelaySec;
+    uint32 public unstakeDelaySec;
 
     /**
      * minimum value required to stake for a paymaster
      */
-    uint256 public immutable paymasterStake;
+    uint256 public paymasterStake;
 
-    constructor(uint256 _paymasterStake, uint32 _unstakeDelaySec) {
+    function __StakeManager_init(
+        uint256 _paymasterStake,
+        uint32 _unstakeDelaySec
+    ) internal onlyInitializing {
         unstakeDelaySec = _unstakeDelaySec;
         paymasterStake = _paymasterStake;
     }
