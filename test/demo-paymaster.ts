@@ -50,14 +50,14 @@ describe("EntryPoint with whitelist paymaster", function () {
     );
     console.log(`Paymaster: ${paymaster.address}`);
     // add DummyContract to paymaster
-    await paymaster.addAvailAddr(dummyContract.address);
+    await paymaster.addWhitelistContract(dummyContract.address);
 
     const paymasterStake = await entryPoint.paymasterStake();
     console.log(`min stake: ${paymasterStake.toString()}`);
 
     await paymaster.addStake(99999999, { value: parseEther("1.1") });
     console.log("add stake for paymaster");
-    await paymaster.addWhitelistAddress(whitelistUser.address);
+    await paymaster.addWhitelistUser(whitelistUser.address);
     console.log("add whitelist for paymaster");
 
     await entryPoint.depositTo(paymaster.address, {
@@ -228,7 +228,7 @@ describe("EntryPoint with whitelist paymaster", function () {
 
     it("remove from whitelist", async () => {
       // Remove from whitelist.
-      await paymaster.removeWhitelistAddress(whitelistUser.address);
+      await paymaster.removeWhitelistUser(whitelistUser.address);
       // Mock UserOp
       const userOp: UserOperationStruct = {
         callContract: dummyContract.address,
@@ -300,7 +300,7 @@ describe("EntryPoint with whitelist paymaster", function () {
           maxPriorityFeePerGas: 1,
           paymasterAndData: hexConcat([paymaster.address, "0x1234"]),
         };
-        await paymaster.addWhitelistAddress(sender.address);
+        await paymaster.addWhitelistUser(sender.address);
         const tx = await entryPoint
           .connect(sender)
           .handleOp(userOp, { gasLimit: 400000, gasPrice: 0 });
