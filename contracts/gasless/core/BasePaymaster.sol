@@ -15,18 +15,8 @@ import "../interfaces/IEntryPoint.sol";
 abstract contract BasePaymaster is IPaymaster, Ownable {
     IEntryPoint public entryPoint;
 
-    address private immutable admin;
-
-    // Only users in the whitelist are valide.
-    // This is for demo only. Do not use this on mainnet.
-    mapping(address => bool) private whitelist;
-
-    // User can only make calls to the contracts from `availAddrs`.
-    mapping(address => bool) private availAddrs;
-
     constructor(IEntryPoint _entryPoint) {
         setEntryPoint(_entryPoint);
-        admin = msg.sender;
     }
 
     function setEntryPoint(IEntryPoint _entryPoint) public onlyOwner {
@@ -129,52 +119,5 @@ abstract contract BasePaymaster is IPaymaster, Ownable {
     /// validate the call is made from a valid entrypoint
     function _requireFromEntryPoint() internal view virtual {
         require(msg.sender == address(entryPoint));
-    }
-
-    /// validate the call is mode from whitelist
-    function _requireFromWhitelist() internal view virtual {
-        // FIXME: use UserOpseration.sender instead
-        require(whitelist[tx.origin] == true, "Verifying user in whitelist.");
-    }
-
-    /**
-     * Add addrs to whitelist by admin.
-     */
-    function addWhitelistAddress(address user) public {
-        require(admin == msg.sender, "Verifying only admin can add user.");
-        whitelist[user] = true;
-    }
-
-    /**
-     * Remove addrs from whitelist by admin.
-     */
-    function removeWhitelistAddress(address user) public {
-        require(admin == msg.sender, "Verifying only admin can remove user.");
-        delete (whitelist[user]);
-    }
-
-    function addAvailAddr(address addr) public {
-        require(
-            admin == msg.sender,
-            "Verifying only admin can add available address."
-        );
-        availAddrs[addr] = true;
-    }
-
-    function removeAvailAddr(address addr) public {
-        require(
-            admin == msg.sender,
-            "Verifying only admin can add available address."
-        );
-        delete (availAddrs[addr]);
-    }
-
-    function _requireCallFromAvailAddrs(
-        address userOpCallAddr
-    ) internal view virtual {
-        require(
-            availAddrs[userOpCallAddr] == true,
-            "Verifying call address from user operation."
-        );
     }
 }

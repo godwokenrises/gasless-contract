@@ -4,6 +4,7 @@ pragma solidity ^0.8.12;
 /* solhint-disable reason-string */
 
 import "../core/BasePaymaster.sol";
+import "../interfaces/IWhitelist.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
@@ -15,9 +16,15 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
  * - the paymaster signs to agree to PAY for GAS.
  * - the wallet signs to prove identity and wallet ownership.
  */
-contract DemoPaymaster is BasePaymaster {
+contract DemoPaymaster is BasePaymaster, IWhitelist {
     using ECDSA for bytes32;
     using UserOperationLib for UserOperation;
+
+    // Only users in the whitelist are valide.
+    mapping(address => bool) private whitelistUser;
+
+    // User can only make calls to the contracts from `whitelistContract`.
+    mapping(address => bool) private whitelistContract;
 
     constructor(IEntryPoint _entryPoint) BasePaymaster(_entryPoint) {}
 
@@ -29,17 +36,57 @@ contract DemoPaymaster is BasePaymaster {
         UserOperation calldata userOp
     ) external view override returns (bytes memory context, uint256 deadline) {
         super._requireFromEntryPoint();
-        super._requireCallFromAvailAddrs(userOp.callContract);
+        _requireCallFromWhitelistContract(userOp.callContract);
         // In this demo, we don't use `userOp`.
         require(
             userOp.maxFeePerGas == userOp.maxPriorityFeePerGas,
             "Useless check to pass CI"
         );
 
-        super._requireFromWhitelist();
+        _requireFromWhitelist();
 
         // check userOp ...
 
         return ("", 0);
+    }
+
+    /// validate the call is mode from whitelist
+    function _requireFromWhitelist() internal view virtual {
+        // FIXME: use UserOpseration.sender instead
+        require(
+            whitelistUser[tx.origin] == true,
+            "Verifying user in whitelist."
+        );
+    }
+
+    /**
+     * Add addrs to whitelist by owner.
+     */
+    function addWhitelistUser(address user) external onlyOwner {
+        whitelistUser[user] = true;
+    }
+
+    /**
+     * Remove addrs from whitelist by owner.
+     */
+    function removeWhitelistUser(address user) external onlyOwner {
+        delete (whitelistUser[user]);
+    }
+
+    function addWhitelistContract(address addr) external onlyOwner {
+        whitelistContract[addr] = true;
+    }
+
+    function removeWhitelistContract(address addr) external onlyOwner {
+        delete (whitelistContract[addr]);
+    }
+
+    function _requireCallFromWhitelistContract(
+        address userOpCallAddr
+    ) internal view virtual {
+        require(
+            whitelistContract[userOpCallAddr] == true,
+            "Verifying call address from user operation."
+        );
     }
 }
