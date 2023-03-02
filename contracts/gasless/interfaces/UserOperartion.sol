@@ -18,6 +18,7 @@ struct UserOperation {
     bytes callData;
     uint256 callGasLimit;
     uint256 verificationGasLimit;
+    uint256 preVerificationGas;
     uint256 maxFeePerGas;
     uint256 maxPriorityFeePerGas;
     bytes paymasterAndData;

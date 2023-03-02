@@ -20,6 +20,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         address paymaster;
         uint256 callGasLimit;
         uint256 verificationGasLimit;
+        uint256 preVerificationGas;
         uint256 maxFeePerGas;
         uint256 maxPriorityFeePerGas;
     }
@@ -148,6 +149,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         mUserOp.callContract = userOp.callContract;
         mUserOp.callGasLimit = userOp.callGasLimit;
         mUserOp.verificationGasLimit = userOp.verificationGasLimit;
+        mUserOp.preVerificationGas = userOp.preVerificationGas;
         mUserOp.maxFeePerGas = userOp.maxFeePerGas;
         mUserOp.maxPriorityFeePerGas = userOp.maxPriorityFeePerGas;
         bytes calldata paymasterAndData = userOp.paymasterAndData;
@@ -173,6 +175,29 @@ contract EntryPoint is IEntryPoint, StakeManager {
         deadline = _validatePrepayment(userOp, outOpInfo);
         prefund = outOpInfo.prefund;
         preOpGas = preGas - gasleft();
+
+        require(
+            msg.sender == address(0),
+            "must be called off-chain with from=zero-addr"
+        );
+    }
+
+    function simulateCallContract(
+        UserOperation calldata userOp
+    ) external returns (uint256 callGasUsed) {
+        uint256 preGas = gasleft();
+
+        address callContract = userOp.callContract;
+        uint256 callGasLimit = userOp.callGasLimit;
+        bytes memory callData = userOp.callData;
+        (bool success, ) = address(callContract).call{gas: callGasLimit}(
+            callData
+        );
+        if (!success) {
+            revert("faild to execute call contract");
+        }
+
+        callGasUsed = preGas - gasleft();
 
         require(
             msg.sender == address(0),
@@ -250,6 +275,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
         uint256 maxGasValues = userOp.maxFeePerGas |
             userOp.maxPriorityFeePerGas |
             userOp.callGasLimit |
+            mUserOp.preVerificationGas |
             userOp.verificationGasLimit;
         require(maxGasValues <= type(uint120).max, "gas values overflow");
 
@@ -277,7 +303,7 @@ contract EntryPoint is IEntryPoint, StakeManager {
 
             outOpInfo.prefund = requiredPreFund;
             outOpInfo.contextOffset = getOffsetOfMemoryBytes(context);
-            outOpInfo.preOpGas = preGas - gasleft();
+            outOpInfo.preOpGas = preGas - gasleft() + userOp.preVerificationGas;
         }
     }
 
@@ -352,7 +378,8 @@ contract EntryPoint is IEntryPoint, StakeManager {
             uint256 mul = 3;
             uint256 requiredGas = mUserOp.callGasLimit +
                 mUserOp.verificationGasLimit *
-                mul;
+                mul +
+                mUserOp.preVerificationGas;
 
             // TODO: copy logic of gasPrice?
             requiredPrefund = requiredGas * getUserOpGasPrice(mUserOp);
